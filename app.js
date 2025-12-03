@@ -17,6 +17,26 @@ function isMobileDevice() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
+// 도착 예정 시간 계산 (걸어서 80m/분 기준)
+function calculateArrivalTime(distanceInMeters) {
+    const walkingSpeedPerMinute = 80; // 80m/분 (평균 걸음 속도)
+    const minutes = Math.ceil(distanceInMeters / walkingSpeedPerMinute);
+    
+    if (minutes <= 1) {
+        return '약 1분';
+    } else if (minutes < 60) {
+        return `약 ${minutes}분`;
+    } else {
+        const hours = Math.floor(minutes / 60);
+        const remainingMinutes = minutes % 60;
+        if (remainingMinutes === 0) {
+            return `약 ${hours}시간`;
+        } else {
+            return `약 ${hours}시간 ${remainingMinutes}분`;
+        }
+    }
+}
+
 // 음식 카테고리 매핑 (대폭 확장)
 const categoryMapping = {
     '한식': ['한식', '고기집', '삼겹살', '갈비', '찌개', '백반', '김치찌개', '된장찌개', '순두부', 
@@ -560,6 +580,9 @@ function displayResults(results) {
             ? `${(distance / 1000).toFixed(1)}km` 
             : `${distance}m`;
         
+        // 도착 예정 시간 계산
+        const arrivalTime = calculateArrivalTime(distance);
+        
         // 대표 메뉴 추론
         const menuItems = guessMenuItems(place.place_name, place.category_name, selectedPreferences.foodType);
         const menuHTML = menuItems.length > 0 ? `
@@ -576,7 +599,7 @@ function displayResults(results) {
         item.innerHTML = `
             <h3>${index + 1}. ${place.place_name}</h3>
             <span class="category">${place.category_name.split('>').pop().trim()}</span>
-            <div class="distance">📍 ${distanceText}</div>
+            <div class="distance">📍 ${distanceText} · ⏱️ ${arrivalTime}</div>
             <div class="address">${place.address_name}</div>
             ${place.phone ? `<div class="phone">📞 ${place.phone}</div>` : ''}
             ${menuHTML}
