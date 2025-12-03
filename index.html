@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>점매추 - 점심 메뉴 추천 봇</title>
     <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🍽️</text></svg>">
     <link rel="stylesheet" href="style.css">
@@ -19,6 +19,11 @@
         </header>
 
         <div class="content">
+            <!-- 지도 영역 -->
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+
             <!-- 설정 패널 -->
             <div class="settings-panel">
                 <h2>선호 조건 선택</h2>
@@ -80,17 +85,15 @@
                 <div id="statusMessage" class="status-message"></div>
             </div>
 
-            <!-- 지도 영역 -->
-            <div class="map-container">
-                <div id="map"></div>
-            </div>
-
             <!-- 결과 팝업 모달 -->
             <div class="results-modal" id="resultsModal">
                 <div class="modal-content">
                     <div class="modal-header">
                         <h2>추천 맛집 <span id="resultCount"></span></h2>
                         <button type="button" class="close-btn" id="closeModal">×</button>
+                    </div>
+                    <div class="modal-help-message">
+                        💡 음식점을 클릭하면 구글 검색 페이지로 이동합니다
                     </div>
                     <div id="resultsList" class="results-list"></div>
                 </div>
@@ -102,6 +105,9 @@
                     <div class="modal-header">
                         <h2>⭐ 즐겨찾기 <span id="favoriteCount"></span></h2>
                         <button type="button" class="close-btn" id="closeFavoritesModal">×</button>
+                    </div>
+                    <div class="modal-help-message">
+                        💡 음식점을 클릭하면 구글 검색 페이지로 이동합니다
                     </div>
                     <div id="favoritesList" class="results-list"></div>
                     <div id="emptyFavorites" class="empty-message" style="display: none;">

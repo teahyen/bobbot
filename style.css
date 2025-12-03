@@ -58,7 +58,7 @@ header h1 {
 
 .content {
     display: grid;
-    grid-template-columns: 350px 1fr;
+    grid-template-columns: 1fr 350px;
     grid-template-rows: auto;
     gap: 20px;
 }
@@ -462,6 +462,7 @@ header h1 {
     color: #333;
     margin-bottom: 10px;
     font-size: 1.3em;
+    padding-right: 45px;
 }
 
 .result-item .category {
@@ -534,6 +535,15 @@ header h1 {
     font-size: 1.3em;
     font-weight: bold;
     color: #666;
+}
+
+.modal-help-message {
+    padding: 15px 25px;
+    background: #e3f2fd;
+    color: #1565c0;
+    text-align: center;
+    font-size: 0.95em;
+    border-bottom: 1px solid #e0e0e0;
 }
 
 @media (max-width: 1024px) {
