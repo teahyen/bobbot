@@ -30,9 +30,14 @@ const foodFormKeywords = {
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
     console.log('페이지 로드 완료');
-    initMap();
-    setupEventListeners();
-    console.log('초기화 완료');
+    
+    // 카카오맵 API 로드 대기
+    kakao.maps.load(function() {
+        console.log('카카오맵 API 로드 완료');
+        initMap();
+        setupEventListeners();
+        console.log('초기화 완료');
+    });
 });
 
 // 지도 초기화
