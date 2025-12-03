@@ -14,17 +14,32 @@ let selectedPreferences = {
 
 // 음식 카테고리 매핑
 const categoryMapping = {
-    '한식': ['한식'],
-    '중식': ['중식', '중국집', '중국요리'],
-    '일식': ['일식', '돈까스', '회', '초밥', '라멘'],
-    '양식': ['양식', '이탈리안', '스테이크', '햄버거', '파스타']
+    '한식': ['한식', '고기집', '삼겹살', '갈비', '찌개', '백반', '김치찌개', '된장찌개'],
+    '중식': ['중식', '중국집', '중국요리', '짜장면', '짬뽕', '탕수육'],
+    '일식': ['일식', '돈까스', '회', '초밥', '라멘', '우동', '소바', '일본요리'],
+    '양식': ['양식', '이탈리안', '스테이크', '햄버거', '파스타', '피자', '레스토랑'],
+    '동남아': ['태국음식', '베트남음식', '쌀국수', '팟타이', '분짜', '월남쌈', '동남아']
 };
 
 // 음식 형태 키워드 매핑
 const foodFormKeywords = {
-    '밥': ['덮밥', '비빔밥', '볶음밥', '쌈밥', '정식', '백반', '한정식', '고기', '삼겹살', '갈비'],
-    '빵': ['베이커리', '샌드위치', '토스트', '햄버거', '빵', '파니니'],
-    '면': ['국수', '라면', '우동', '소바', '파스타', '짜장', '짬뽕', '냉면', '칼국수', '쌀국수']
+    '밥': ['덮밥', '비빔밥', '볶음밥', '쌈밥', '정식', '백반', '한정식', '고기', '삼겹살', '갈비', 
+          '제육', '불고기', '김치찌개', '된장찌개', '순두부', '돈까스', '카레', '초밥', '회덮밥',
+          '규동', '오므라이스', '리조또'],
+    '빵': ['베이커리', '샌드위치', '토스트', '햄버거', '빵', '파니니', '베이글', '크루아상', 
+          '핫도그', '브런치'],
+    '면': ['국수', '라면', '우동', '소바', '파스타', '짜장', '짬뽕', '냉면', '칼국수', '쌀국수',
+          '스파게티', '라멘', '쫄면', '비빔국수', '잔치국수', '막국수', '수제비', '팟타이',
+          '볶음면', '탕면']
+};
+
+// 대표 메뉴 추론 키워드
+const menuKeywords = {
+    '한식': ['삼겹살', '김치찌개', '된장찌개', '불고기', '갈비', '비빔밥', '제육볶음', '순두부찌개'],
+    '중식': ['짜장면', '짬뽕', '탕수육', '마라탕', '양장피', '깐풍기', '볶음밥'],
+    '일식': ['초밥', '라멘', '돈까스', '우동', '회', '소바', '규동', '텐동'],
+    '양식': ['파스타', '피자', '스테이크', '리조또', '햄버거', '샐러드', '그라탕'],
+    '동남아': ['쌀국수', '팟타이', '분짜', '월남쌈', '똠얌꿍', '카오팟', '분보']
 };
 
 // 페이지 로드 시 초기화
@@ -108,6 +123,37 @@ function getUserLocation() {
     }
 }
 
+// 주소 검색 함수
+function searchAddress(keyword) {
+    const geocoder = new kakao.maps.services.Geocoder();
+    
+    showStatus('주소를 검색하는 중...', 'info');
+    
+    geocoder.addressSearch(keyword, function(result, status) {
+        if (status === kakao.maps.services.Status.OK) {
+            const coords = new kakao.maps.LatLng(result[0].y, result[0].x);
+            searchLocation = coords;
+            setSearchLocation(coords, keyword);
+            map.setLevel(3);
+            showStatus(`'${keyword}' 위치로 설정되었습니다!`, 'success');
+        } else {
+            // 주소 검색 실패 시 키워드 검색 시도
+            const ps = new kakao.maps.services.Places();
+            ps.keywordSearch(keyword, function(data, status) {
+                if (status === kakao.maps.services.Status.OK && data.length > 0) {
+                    const coords = new kakao.maps.LatLng(data[0].y, data[0].x);
+                    searchLocation = coords;
+                    setSearchLocation(coords, data[0].place_name);
+                    map.setLevel(3);
+                    showStatus(`'${data[0].place_name}' 위치로 설정되었습니다!`, 'success');
+                } else {
+                    showStatus('검색 결과가 없습니다. 다른 키워드로 시도해주세요.', 'error');
+                }
+            });
+        }
+    });
+}
+
 // 검색 위치 설정
 function setSearchLocation(position, label) {
     searchLocation = position;
@@ -167,6 +213,7 @@ function setupEventListeners() {
             locationMode = 'current';
             document.getElementById('useCurrentLocation').classList.add('active');
             document.getElementById('useMapLocation').classList.remove('active');
+            document.getElementById('searchLocationInput').style.display = 'none';
             document.getElementById('locationHelp').textContent = '현재 위치로 검색합니다';
             
             if (userLocation) {
@@ -184,8 +231,52 @@ function setupEventListeners() {
             locationMode = 'map';
             document.getElementById('useCurrentLocation').classList.remove('active');
             document.getElementById('useMapLocation').classList.add('active');
-            document.getElementById('locationHelp').textContent = '지도를 클릭하여 위치를 선택하세요';
-            showStatus('지도에서 위치를 클릭해주세요.', 'info');
+            document.getElementById('searchLocationInput').style.display = 'flex';
+            document.getElementById('locationHelp').textContent = '주소를 검색하거나 지도를 클릭하세요';
+            showStatus('주소를 검색하거나 지도를 클릭해주세요.', 'info');
+        });
+    }
+    
+    // 위치 검색 버튼
+    const searchLocationBtn = document.getElementById('searchLocationBtn');
+    const locationSearchInput = document.getElementById('locationSearchInput');
+    
+    if (searchLocationBtn && locationSearchInput) {
+        searchLocationBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            const keyword = locationSearchInput.value.trim();
+            if (keyword) {
+                searchAddress(keyword);
+            }
+        });
+        
+        // Enter 키로도 검색 가능
+        locationSearchInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                const keyword = this.value.trim();
+                if (keyword) {
+                    searchAddress(keyword);
+                }
+            }
+        });
+    }
+    
+    // 모달 닫기 버튼
+    const closeModal = document.getElementById('closeModal');
+    if (closeModal) {
+        closeModal.addEventListener('click', function() {
+            document.getElementById('resultsModal').classList.remove('show');
+        });
+    }
+    
+    // 모달 배경 클릭 시 닫기
+    const resultsModal = document.getElementById('resultsModal');
+    if (resultsModal) {
+        resultsModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
         });
     }
     
@@ -343,9 +434,30 @@ function processResults(results) {
     showStatus(`${filteredResults.length}개의 맛집을 찾았습니다!`, 'success');
 }
 
+// 대표 메뉴 추론 함수
+function guessMenuItems(placeName, categoryName, foodType) {
+    const menus = [];
+    const lowerName = placeName.toLowerCase();
+    const lowerCategory = categoryName.toLowerCase();
+    
+    // 음식 종류별 키워드로 메뉴 추론
+    if (menuKeywords[foodType]) {
+        menuKeywords[foodType].forEach(menu => {
+            if (lowerName.includes(menu.toLowerCase()) || lowerCategory.includes(menu.toLowerCase())) {
+                if (!menus.includes(menu)) {
+                    menus.push(menu);
+                }
+            }
+        });
+    }
+    
+    // 최대 2개까지만 반환
+    return menus.slice(0, 2);
+}
+
 // 결과 표시
 function displayResults(results) {
-    const resultsPanel = document.getElementById('resultsPanel');
+    const resultsModal = document.getElementById('resultsModal');
     const resultsList = document.getElementById('resultsList');
     const resultCount = document.getElementById('resultCount');
     
@@ -358,6 +470,17 @@ function displayResults(results) {
             ? `${(distance / 1000).toFixed(1)}km` 
             : `${distance}m`;
         
+        // 대표 메뉴 추론
+        const menuItems = guessMenuItems(place.place_name, place.category_name, selectedPreferences.foodType);
+        const menuHTML = menuItems.length > 0 ? `
+            <div class="menu">
+                <div class="menu-title">대표 메뉴</div>
+                <div class="menu-items">
+                    ${menuItems.map(menu => `<span class="menu-item">${menu}</span>`).join('')}
+                </div>
+            </div>
+        ` : '';
+        
         const item = document.createElement('div');
         item.className = 'result-item';
         item.innerHTML = `
@@ -366,19 +489,21 @@ function displayResults(results) {
             <div class="distance">📍 ${distanceText}</div>
             <div class="address">${place.address_name}</div>
             ${place.phone ? `<div class="phone">📞 ${place.phone}</div>` : ''}
+            ${menuHTML}
         `;
         
-        // 클릭 시 지도에서 해당 위치로 이동
+        // 클릭 시 지도에서 해당 위치로 이동하고 모달 닫기
         item.addEventListener('click', function() {
             const position = new kakao.maps.LatLng(place.y, place.x);
             map.setCenter(position);
             map.setLevel(3);
+            resultsModal.classList.remove('show');
         });
         
         resultsList.appendChild(item);
     });
     
-    resultsPanel.classList.add('show');
+    resultsModal.classList.add('show');
 }
 
 // 마커 표시

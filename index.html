@@ -27,8 +27,12 @@
                             📍 현재 위치
                         </button>
                         <button type="button" id="useMapLocation" class="location-btn">
-                            🗺️ 지도에서 선택
+                            🗺️ 지도 클릭
                         </button>
+                    </div>
+                    <div class="search-location-input" id="searchLocationInput" style="display: none;">
+                        <input type="text" id="locationSearchInput" placeholder="주소 또는 장소명 검색 (예: 강남역, 홍대)">
+                        <button type="button" id="searchLocationBtn">🔍 검색</button>
                     </div>
                     <div id="locationHelp" class="location-help">
                         현재 위치로 검색합니다
@@ -43,6 +47,7 @@
                         <button type="button" class="option-btn" data-category="food-type" data-value="중식">중식</button>
                         <button type="button" class="option-btn" data-category="food-type" data-value="일식">일식</button>
                         <button type="button" class="option-btn" data-category="food-type" data-value="양식">양식</button>
+                        <button type="button" class="option-btn" data-category="food-type" data-value="동남아">동남아</button>
                     </div>
                 </div>
 
@@ -76,10 +81,15 @@
                 <div id="map"></div>
             </div>
 
-            <!-- 결과 패널 -->
-            <div class="results-panel" id="resultsPanel">
-                <h2>추천 맛집 <span id="resultCount"></span></h2>
-                <div id="resultsList" class="results-list"></div>
+            <!-- 결과 팝업 모달 -->
+            <div class="results-modal" id="resultsModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>추천 맛집 <span id="resultCount"></span></h2>
+                        <button type="button" class="close-btn" id="closeModal">×</button>
+                    </div>
+                    <div id="resultsList" class="results-list"></div>
+                </div>
             </div>
         </div>
     </div>
