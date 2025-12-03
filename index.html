@@ -8,10 +8,14 @@
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
+    <!-- 토스트 알림 컨테이너 -->
+    <div id="toastContainer" class="toast-container"></div>
+
     <div class="container">
         <header>
             <h1>🍽️ 점매추</h1>
             <p class="subtitle">점심 메뉴 추천 봇</p>
+            <button type="button" id="showFavorites" class="favorites-btn">⭐ 즐겨찾기</button>
         </header>
 
         <div class="content">
@@ -89,6 +93,21 @@
                         <button type="button" class="close-btn" id="closeModal">×</button>
                     </div>
                     <div id="resultsList" class="results-list"></div>
+                </div>
+            </div>
+
+            <!-- 즐겨찾기 모달 -->
+            <div class="results-modal" id="favoritesModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h2>⭐ 즐겨찾기 <span id="favoriteCount"></span></h2>
+                        <button type="button" class="close-btn" id="closeFavoritesModal">×</button>
+                    </div>
+                    <div id="favoritesList" class="results-list"></div>
+                    <div id="emptyFavorites" class="empty-message" style="display: none;">
+                        <p>아직 즐겨찾기한 맛집이 없습니다.</p>
+                        <p>맛집 카드의 ⭐ 버튼을 눌러 즐겨찾기에 추가해보세요!</p>
+                    </div>
                 </div>
             </div>
         </div>

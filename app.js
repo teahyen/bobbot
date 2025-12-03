@@ -17,6 +17,34 @@ function isMobileDevice() {
     return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 }
 
+// 토스트 알림 표시
+function showToast(message, type = 'info') {
+    const container = document.getElementById('toastContainer');
+    const toast = document.createElement('div');
+    toast.className = `toast ${type}`;
+    
+    const icons = {
+        success: '✓',
+        error: '✕',
+        info: 'ℹ'
+    };
+    
+    toast.innerHTML = `
+        <span class="toast-icon">${icons[type] || icons.info}</span>
+        <span>${message}</span>
+    `;
+    
+    container.appendChild(toast);
+    
+    // 3초 후 자동 제거
+    setTimeout(() => {
+        toast.style.animation = 'fadeOut 0.3s ease';
+        setTimeout(() => {
+            container.removeChild(toast);
+        }, 300);
+    }, 3000);
+}
+
 // 도착 예정 시간 계산 (걸어서 80m/분 기준)
 function calculateArrivalTime(distanceInMeters) {
     const walkingSpeedPerMinute = 80; // 80m/분 (평균 걸음 속도)
@@ -36,6 +64,48 @@ function calculateArrivalTime(distanceInMeters) {
         }
     }
 }
+
+// 즐겨찾기 관리
+const FavoritesManager = {
+    // 즐겨찾기 가져오기
+    getFavorites() {
+        const favorites = localStorage.getItem('favorites');
+        return favorites ? JSON.parse(favorites) : [];
+    },
+    
+    // 즐겨찾기 저장
+    saveFavorites(favorites) {
+        localStorage.setItem('favorites', JSON.stringify(favorites));
+    },
+    
+    // 즐겨찾기 추가
+    addFavorite(place) {
+        const favorites = this.getFavorites();
+        const exists = favorites.some(fav => fav.id === place.id);
+        
+        if (!exists) {
+            favorites.push(place);
+            this.saveFavorites(favorites);
+            showToast(`${place.place_name}을(를) 즐겨찾기에 추가했습니다!`, 'success');
+            return true;
+        }
+        return false;
+    },
+    
+    // 즐겨찾기 제거
+    removeFavorite(placeId) {
+        const favorites = this.getFavorites();
+        const filtered = favorites.filter(fav => fav.id !== placeId);
+        this.saveFavorites(filtered);
+        showToast('즐겨찾기에서 제거했습니다.', 'info');
+    },
+    
+    // 즐겨찾기 여부 확인
+    isFavorite(placeId) {
+        const favorites = this.getFavorites();
+        return favorites.some(fav => fav.id === placeId);
+    }
+};
 
 // 음식 카테고리 매핑 (대폭 확장)
 const categoryMapping = {
@@ -430,6 +500,33 @@ function setupEventListeners() {
         });
     }
     
+    // 즐겨찾기 버튼
+    const showFavoritesBtn = document.getElementById('showFavorites');
+    if (showFavoritesBtn) {
+        showFavoritesBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            displayFavorites();
+        });
+    }
+    
+    // 즐겨찾기 모달 닫기
+    const closeFavoritesModal = document.getElementById('closeFavoritesModal');
+    if (closeFavoritesModal) {
+        closeFavoritesModal.addEventListener('click', function() {
+            document.getElementById('favoritesModal').classList.remove('show');
+        });
+    }
+    
+    // 즐겨찾기 모달 배경 클릭 시 닫기
+    const favoritesModal = document.getElementById('favoritesModal');
+    if (favoritesModal) {
+        favoritesModal.addEventListener('click', function(e) {
+            if (e.target === this) {
+                this.classList.remove('show');
+            }
+        });
+    }
+    
     console.log('이벤트 리스너 설정 완료');
 }
 
@@ -596,7 +693,13 @@ function displayResults(results) {
         
         const item = document.createElement('div');
         item.className = 'result-item';
+        
+        const isFavorited = FavoritesManager.isFavorite(place.id);
+        
         item.innerHTML = `
+            <button type="button" class="favorite-btn" data-place-id="${place.id}" onclick="event.stopPropagation();">
+                ${isFavorited ? '⭐' : '☆'}
+            </button>
             <h3>${index + 1}. ${place.place_name}</h3>
             <span class="category">${place.category_name.split('>').pop().trim()}</span>
             <div class="distance">📍 ${distanceText} · ⏱️ ${arrivalTime}</div>
@@ -605,12 +708,17 @@ function displayResults(results) {
             ${menuHTML}
         `;
         
-        // 클릭 시 지도에서 해당 위치로 이동하고 모달 닫기
+        // 즐겨찾기 버튼 이벤트
+        const favoriteBtn = item.querySelector('.favorite-btn');
+        favoriteBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            toggleFavorite(place, this);
+        });
+        
+        // 클릭 시 구글 검색
         item.addEventListener('click', function() {
-            const position = new kakao.maps.LatLng(place.y, place.x);
-            map.setCenter(position);
-            map.setLevel(3);
-            resultsModal.classList.remove('show');
+            const searchQuery = encodeURIComponent(place.place_name + ' ' + place.address_name);
+            window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
         });
         
         resultsList.appendChild(item);
@@ -660,16 +768,86 @@ function clearMarkers() {
     markers = [];
 }
 
-// 상태 메시지 표시
+// 상태 메시지 표시 (토스트 알림 사용)
 function showStatus(message, type) {
-    const statusDiv = document.getElementById('statusMessage');
-    statusDiv.textContent = message;
-    statusDiv.className = `status-message ${type}`;
+    // HTML 태그 제거하고 텍스트만 추출
+    const div = document.createElement('div');
+    div.innerHTML = message;
+    const textMessage = div.textContent || div.innerText || message;
     
-    if (type === 'success') {
-        setTimeout(() => {
-            statusDiv.textContent = '';
-            statusDiv.className = 'status-message';
-        }, 5000);
+    showToast(textMessage, type);
+}
+
+// 즐겨찾기 토글
+function toggleFavorite(place, button) {
+    const isFavorited = FavoritesManager.isFavorite(place.id);
+    
+    if (isFavorited) {
+        FavoritesManager.removeFavorite(place.id);
+        button.textContent = '☆';
+    } else {
+        FavoritesManager.addFavorite(place);
+        button.textContent = '⭐';
+        button.classList.add('active');
+        setTimeout(() => button.classList.remove('active'), 500);
     }
+}
+
+// 즐겨찾기 목록 표시
+function displayFavorites() {
+    const favoritesModal = document.getElementById('favoritesModal');
+    const favoritesList = document.getElementById('favoritesList');
+    const favoriteCount = document.getElementById('favoriteCount');
+    const emptyMessage = document.getElementById('emptyFavorites');
+    
+    const favorites = FavoritesManager.getFavorites();
+    
+    favoritesList.innerHTML = '';
+    favoriteCount.textContent = `(${favorites.length}개)`;
+    
+    if (favorites.length === 0) {
+        favoritesList.style.display = 'none';
+        emptyMessage.style.display = 'block';
+    } else {
+        favoritesList.style.display = 'grid';
+        emptyMessage.style.display = 'none';
+        
+        favorites.forEach((place, index) => {
+            const distance = parseInt(place.distance || 0);
+            const distanceText = distance >= 1000 
+                ? `${(distance / 1000).toFixed(1)}km` 
+                : distance > 0 ? `${distance}m` : '거리 정보 없음';
+            
+            const arrivalTime = distance > 0 ? calculateArrivalTime(distance) : '';
+            
+            const item = document.createElement('div');
+            item.className = 'result-item';
+            item.innerHTML = `
+                <button type="button" class="favorite-btn" data-place-id="${place.id}" onclick="event.stopPropagation();">⭐</button>
+                <h3>${index + 1}. ${place.place_name}</h3>
+                <span class="category">${place.category_name ? place.category_name.split('>').pop().trim() : '음식점'}</span>
+                <div class="distance">📍 ${distanceText}${arrivalTime ? ' · ⏱️ ' + arrivalTime : ''}</div>
+                <div class="address">${place.address_name}</div>
+                ${place.phone ? `<div class="phone">📞 ${place.phone}</div>` : ''}
+            `;
+            
+            // 즐겨찾기 제거 버튼
+            const favoriteBtn = item.querySelector('.favorite-btn');
+            favoriteBtn.addEventListener('click', function(e) {
+                e.stopPropagation();
+                FavoritesManager.removeFavorite(place.id);
+                displayFavorites(); // 목록 새로고침
+            });
+            
+            // 클릭 시 구글 검색
+            item.addEventListener('click', function() {
+                const searchQuery = encodeURIComponent(place.place_name + ' ' + place.address_name);
+                window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
+            });
+            
+            favoritesList.appendChild(item);
+        });
+    }
+    
+    favoritesModal.classList.add('show');
 }
