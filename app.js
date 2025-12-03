@@ -28,17 +28,28 @@ const foodFormKeywords = {
 };
 
 // 페이지 로드 시 초기화
-document.addEventListener('DOMContentLoaded', function() {
-    console.log('페이지 로드 완료');
+function initApp() {
+    console.log('앱 초기화 시작');
     
-    // 카카오맵 API 로드 대기
-    kakao.maps.load(function() {
-        console.log('카카오맵 API 로드 완료');
-        initMap();
-        setupEventListeners();
-        console.log('초기화 완료');
-    });
-});
+    // kakao 객체 확인
+    if (typeof kakao === 'undefined') {
+        console.error('카카오맵 API가 로드되지 않았습니다!');
+        setTimeout(initApp, 100); // 100ms 후 재시도
+        return;
+    }
+    
+    console.log('카카오맵 API 확인 완료');
+    initMap();
+    setupEventListeners();
+    console.log('초기화 완료');
+}
+
+// DOM과 스크립트 로드 완료 후 실행
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initApp);
+} else {
+    initApp();
+}
 
 // 지도 초기화
 function initMap() {
