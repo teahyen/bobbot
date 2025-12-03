@@ -29,8 +29,10 @@ const foodFormKeywords = {
 
 // 페이지 로드 시 초기화
 document.addEventListener('DOMContentLoaded', function() {
+    console.log('페이지 로드 완료');
     initMap();
     setupEventListeners();
+    console.log('초기화 완료');
 });
 
 // 지도 초기화
@@ -133,31 +135,53 @@ function createMarkerImage() {
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
-    // 위치 모드 버튼 클릭
-    document.getElementById('useCurrentLocation').addEventListener('click', function() {
-        locationMode = 'current';
-        document.getElementById('useCurrentLocation').classList.add('active');
-        document.getElementById('useMapLocation').classList.remove('active');
-        document.getElementById('locationHelp').textContent = '현재 위치로 검색합니다';
-        
-        if (userLocation) {
-            searchLocation = userLocation;
-            setSearchLocation(userLocation, '현재 위치');
-            showStatus('현재 위치로 설정되었습니다.', 'success');
-        }
-    });
+    console.log('이벤트 리스너 설정 시작');
     
-    document.getElementById('useMapLocation').addEventListener('click', function() {
-        locationMode = 'map';
-        document.getElementById('useCurrentLocation').classList.remove('active');
-        document.getElementById('useMapLocation').classList.add('active');
-        document.getElementById('locationHelp').textContent = '지도를 클릭하여 위치를 선택하세요';
-        showStatus('지도에서 위치를 클릭해주세요.', 'info');
-    });
+    // 위치 모드 버튼 클릭
+    const currentLocBtn = document.getElementById('useCurrentLocation');
+    const mapLocBtn = document.getElementById('useMapLocation');
+    
+    console.log('현재 위치 버튼:', currentLocBtn);
+    console.log('지도 위치 버튼:', mapLocBtn);
+    
+    if (currentLocBtn) {
+        currentLocBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('현재 위치 버튼 클릭됨');
+            locationMode = 'current';
+            document.getElementById('useCurrentLocation').classList.add('active');
+            document.getElementById('useMapLocation').classList.remove('active');
+            document.getElementById('locationHelp').textContent = '현재 위치로 검색합니다';
+            
+            if (userLocation) {
+                searchLocation = userLocation;
+                setSearchLocation(userLocation, '현재 위치');
+                showStatus('현재 위치로 설정되었습니다.', 'success');
+            }
+        });
+    }
+    
+    if (mapLocBtn) {
+        mapLocBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('지도 위치 버튼 클릭됨');
+            locationMode = 'map';
+            document.getElementById('useCurrentLocation').classList.remove('active');
+            document.getElementById('useMapLocation').classList.add('active');
+            document.getElementById('locationHelp').textContent = '지도를 클릭하여 위치를 선택하세요';
+            showStatus('지도에서 위치를 클릭해주세요.', 'info');
+        });
+    }
     
     // 옵션 버튼 클릭
-    document.querySelectorAll('.option-btn').forEach(button => {
-        button.addEventListener('click', function() {
+    const optionButtons = document.querySelectorAll('.option-btn');
+    console.log('옵션 버튼 개수:', optionButtons.length);
+    
+    optionButtons.forEach(button => {
+        button.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('옵션 버튼 클릭:', this.dataset.category, this.dataset.value);
+            
             const category = this.dataset.category;
             const value = this.dataset.value;
             
@@ -172,16 +196,30 @@ function setupEventListeners() {
             // 선택값 저장
             if (category === 'food-type') {
                 selectedPreferences.foodType = value;
+                console.log('음식 종류 선택됨:', value);
             } else if (category === 'food-form') {
                 selectedPreferences.foodForm = value;
+                console.log('음식 형태 선택됨:', value);
             } else if (category === 'distance') {
                 selectedPreferences.distance = parseInt(value);
+                console.log('거리 선택됨:', value);
             }
         });
     });
     
     // 검색 버튼 클릭
-    document.getElementById('searchBtn').addEventListener('click', searchRestaurants);
+    const searchBtn = document.getElementById('searchBtn');
+    console.log('검색 버튼:', searchBtn);
+    
+    if (searchBtn) {
+        searchBtn.addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('검색 버튼 클릭됨');
+            searchRestaurants();
+        });
+    }
+    
+    console.log('이벤트 리스너 설정 완료');
 }
 
 // 맛집 검색
