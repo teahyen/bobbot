@@ -18,6 +18,22 @@
             <div class="settings-panel">
                 <h2>선호 조건 선택</h2>
                 
+                <!-- 위치 선택 -->
+                <div class="form-group">
+                    <label>검색 위치 선택</label>
+                    <div class="button-group horizontal">
+                        <button id="useCurrentLocation" class="location-btn active">
+                            📍 현재 위치
+                        </button>
+                        <button id="useMapLocation" class="location-btn">
+                            🗺️ 지도에서 선택
+                        </button>
+                    </div>
+                    <div id="locationHelp" class="location-help">
+                        현재 위치로 검색합니다
+                    </div>
+                </div>
+                
                 <!-- 음식 종류 선택 -->
                 <div class="form-group">
                     <label>음식 종류</label>
@@ -68,7 +84,7 @@
     </div>
 
     <!-- 카카오맵 API -->
-    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_API_KEY&libraries=services"></script>
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=267e7b45cb49817628887161b0aef983&libraries=services"></script>
     <script src="app.js"></script>
 </body>
 </html>

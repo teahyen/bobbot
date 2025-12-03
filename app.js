@@ -2,6 +2,10 @@
 let map;
 let markers = [];
 let userLocation = null;
+let searchLocation = null; // 검색에 사용할 위치
+let locationMode = 'current'; // 'current' 또는 'map'
+let locationMarker = null; // 위치 표시 마커
+let locationInfowindow = null; // 위치 정보창
 let selectedPreferences = {
     foodType: null,
     foodForm: null,
@@ -39,6 +43,14 @@ function initMap() {
     
     map = new kakao.maps.Map(container, options);
     
+    // 지도 클릭 이벤트 등록
+    kakao.maps.event.addListener(map, 'click', function(mouseEvent) {
+        if (locationMode === 'map') {
+            const latlng = mouseEvent.latLng;
+            setSearchLocation(latlng, '선택한 위치');
+        }
+    });
+    
     // 사용자 위치 가져오기
     getUserLocation();
 }
@@ -52,20 +64,13 @@ function getUserLocation() {
                 const lon = position.coords.longitude;
                 
                 userLocation = new kakao.maps.LatLng(lat, lon);
+                searchLocation = userLocation; // 기본적으로 현재 위치로 설정
                 
                 // 지도 중심을 사용자 위치로 이동
                 map.setCenter(userLocation);
                 
                 // 사용자 위치 마커 표시
-                const marker = new kakao.maps.Marker({
-                    map: map,
-                    position: userLocation
-                });
-                
-                const infowindow = new kakao.maps.InfoWindow({
-                    content: '<div style="padding:5px;">현재 위치</div>'
-                });
-                infowindow.open(map, marker);
+                setSearchLocation(userLocation, '현재 위치');
                 
                 showStatus('위치를 확인했습니다! 선호하는 조건을 선택해주세요.', 'success');
             },
@@ -73,16 +78,83 @@ function getUserLocation() {
                 console.error('위치 가져오기 실패:', error);
                 showStatus('위치 정보를 가져올 수 없습니다. 기본 위치(서울 시청)로 검색합니다.', 'info');
                 userLocation = new kakao.maps.LatLng(37.5665, 126.9780);
+                searchLocation = userLocation;
+                setSearchLocation(userLocation, '기본 위치');
             }
         );
     } else {
         showStatus('브라우저가 위치 서비스를 지원하지 않습니다.', 'error');
         userLocation = new kakao.maps.LatLng(37.5665, 126.9780);
+        searchLocation = userLocation;
+        setSearchLocation(userLocation, '기본 위치');
     }
+}
+
+// 검색 위치 설정
+function setSearchLocation(position, label) {
+    searchLocation = position;
+    
+    // 기존 마커 제거
+    if (locationMarker) {
+        locationMarker.setMap(null);
+    }
+    if (locationInfowindow) {
+        locationInfowindow.close();
+    }
+    
+    // 새 마커 생성
+    locationMarker = new kakao.maps.Marker({
+        map: map,
+        position: position,
+        image: createMarkerImage()
+    });
+    
+    // 정보창 생성
+    locationInfowindow = new kakao.maps.InfoWindow({
+        content: `<div style="padding:8px;font-size:13px;font-weight:bold;color:#667eea;">${label}</div>`
+    });
+    locationInfowindow.open(map, locationMarker);
+    
+    // 지도 중심 이동
+    map.setCenter(position);
+    
+    if (locationMode === 'map') {
+        showStatus('위치가 선택되었습니다. 조건을 선택하고 검색하세요.', 'success');
+    }
+}
+
+// 커스텀 마커 이미지 생성
+function createMarkerImage() {
+    const imageSrc = 'https://t1.daumcdn.net/localimg/localimages/07/mapapidoc/marker_red.png';
+    const imageSize = new kakao.maps.Size(40, 42);
+    const imageOption = {offset: new kakao.maps.Point(20, 42)};
+    return new kakao.maps.MarkerImage(imageSrc, imageSize, imageOption);
 }
 
 // 이벤트 리스너 설정
 function setupEventListeners() {
+    // 위치 모드 버튼 클릭
+    document.getElementById('useCurrentLocation').addEventListener('click', function() {
+        locationMode = 'current';
+        document.getElementById('useCurrentLocation').classList.add('active');
+        document.getElementById('useMapLocation').classList.remove('active');
+        document.getElementById('locationHelp').textContent = '현재 위치로 검색합니다';
+        
+        if (userLocation) {
+            searchLocation = userLocation;
+            setSearchLocation(userLocation, '현재 위치');
+            showStatus('현재 위치로 설정되었습니다.', 'success');
+        }
+    });
+    
+    document.getElementById('useMapLocation').addEventListener('click', function() {
+        locationMode = 'map';
+        document.getElementById('useCurrentLocation').classList.remove('active');
+        document.getElementById('useMapLocation').classList.add('active');
+        document.getElementById('locationHelp').textContent = '지도를 클릭하여 위치를 선택하세요';
+        showStatus('지도에서 위치를 클릭해주세요.', 'info');
+    });
+    
     // 옵션 버튼 클릭
     document.querySelectorAll('.option-btn').forEach(button => {
         button.addEventListener('click', function() {
@@ -125,7 +197,7 @@ function searchRestaurants() {
         return;
     }
     
-    if (!userLocation) {
+    if (!searchLocation) {
         showStatus('위치 정보를 가져오는 중입니다. 잠시만 기다려주세요.', 'info');
         return;
     }
@@ -148,7 +220,7 @@ function searchRestaurants() {
     // 각 카테고리별로 검색
     categories.forEach(category => {
         const searchOption = {
-            location: userLocation,
+            location: searchLocation, // 선택된 위치로 검색
             radius: selectedPreferences.distance,
             sort: kakao.maps.services.SortBy.DISTANCE
         };

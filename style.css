@@ -72,6 +72,10 @@ header h1 {
     gap: 10px;
 }
 
+.button-group.horizontal {
+    flex-direction: row;
+}
+
 .option-btn {
     padding: 12px 20px;
     border: 2px solid #e0e0e0;
@@ -92,6 +96,39 @@ header h1 {
     background: #667eea;
     color: white;
     border-color: #667eea;
+}
+
+.location-btn {
+    padding: 12px 20px;
+    border: 2px solid #e0e0e0;
+    background: white;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 0.95em;
+    transition: all 0.3s;
+    font-weight: 500;
+    flex: 1;
+}
+
+.location-btn:hover {
+    border-color: #667eea;
+    background: #f5f7ff;
+}
+
+.location-btn.active {
+    background: #667eea;
+    color: white;
+    border-color: #667eea;
+}
+
+.location-help {
+    margin-top: 10px;
+    padding: 10px;
+    background: #e3f2fd;
+    border-radius: 5px;
+    font-size: 0.9em;
+    color: #1565c0;
+    text-align: center;
 }
 
 .search-btn {
