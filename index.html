@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>점매추 - 점심 메뉴 추천 봇</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🍽️ 점매추</h1>
+            <p class="subtitle">점심 메뉴 추천 봇</p>
+        </header>
+
+        <div class="content">
+            <!-- 설정 패널 -->
+            <div class="settings-panel">
+                <h2>선호 조건 선택</h2>
+                
+                <!-- 음식 종류 선택 -->
+                <div class="form-group">
+                    <label>음식 종류</label>
+                    <div class="button-group">
+                        <button class="option-btn" data-category="food-type" data-value="한식">한식</button>
+                        <button class="option-btn" data-category="food-type" data-value="중식">중식</button>
+                        <button class="option-btn" data-category="food-type" data-value="일식">일식</button>
+                        <button class="option-btn" data-category="food-type" data-value="양식">양식</button>
+                    </div>
+                </div>
+
+                <!-- 음식 형태 선택 -->
+                <div class="form-group">
+                    <label>음식 형태</label>
+                    <div class="button-group">
+                        <button class="option-btn" data-category="food-form" data-value="밥">밥</button>
+                        <button class="option-btn" data-category="food-form" data-value="빵">빵</button>
+                        <button class="option-btn" data-category="food-form" data-value="면">면</button>
+                    </div>
+                </div>
+
+                <!-- 거리 선택 -->
+                <div class="form-group">
+                    <label>거리</label>
+                    <div class="button-group">
+                        <button class="option-btn" data-category="distance" data-value="800">걸어서 10분 이내</button>
+                        <button class="option-btn" data-category="distance" data-value="1600">20분 이내</button>
+                        <button class="option-btn" data-category="distance" data-value="3000">30분 이상</button>
+                    </div>
+                </div>
+
+                <button id="searchBtn" class="search-btn">🔍 맛집 찾기</button>
+                
+                <div id="statusMessage" class="status-message"></div>
+            </div>
+
+            <!-- 지도 영역 -->
+            <div class="map-container">
+                <div id="map"></div>
+            </div>
+
+            <!-- 결과 패널 -->
+            <div class="results-panel" id="resultsPanel">
+                <h2>추천 맛집 <span id="resultCount"></span></h2>
+                <div id="resultsList" class="results-list"></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 카카오맵 API -->
+    <script type="text/javascript" src="//dapi.kakao.com/v2/maps/sdk.js?appkey=YOUR_KAKAO_API_KEY&libraries=services"></script>
+    <script src="app.js"></script>
+</body>
+</html>
