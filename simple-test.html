@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>버튼 테스트</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 40px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: #667eea;
+            text-align: center;
+        }
+        
+        .button-group {
+            margin: 20px 0;
+        }
+        
+        button {
+            width: 100%;
+            padding: 15px;
+            margin: 10px 0;
+            font-size: 16px;
+            cursor: pointer;
+            border: 2px solid #e0e0e0;
+            background: white;
+            border-radius: 8px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+        }
+        
+        button.active {
+            background: #667eea;
+            color: white;
+            border-color: #667eea;
+        }
+        
+        #result {
+            margin-top: 30px;
+            padding: 20px;
+            background: #e8f5e9;
+            border-radius: 8px;
+            color: #2e7d32;
+            font-weight: bold;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🍽️ 버튼 클릭 테스트</h1>
+        
+        <div class="button-group">
+            <h3>음식 종류</h3>
+            <button type="button" class="food-btn" data-value="한식">한식</button>
+            <button type="button" class="food-btn" data-value="중식">중식</button>
+            <button type="button" class="food-btn" data-value="일식">일식</button>
+            <button type="button" class="food-btn" data-value="양식">양식</button>
+        </div>
+        
+        <div class="button-group">
+            <h3>음식 형태</h3>
+            <button type="button" class="form-btn" data-value="밥">밥</button>
+            <button type="button" class="form-btn" data-value="빵">빵</button>
+            <button type="button" class="form-btn" data-value="면">면</button>
+        </div>
+        
+        <button type="button" id="submitBtn" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; font-size: 18px; font-weight: bold;">
+            🔍 선택 완료
+        </button>
+        
+        <div id="result">버튼을 눌러보세요!</div>
+    </div>
+    
+    <script>
+        console.log('스크립트 로드됨');
+        
+        let selectedFood = null;
+        let selectedForm = null;
+        
+        // 음식 종류 버튼
+        document.querySelectorAll('.food-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('음식 버튼 클릭:', this.dataset.value);
+                
+                // 모든 버튼 비활성화
+                document.querySelectorAll('.food-btn').forEach(b => b.classList.remove('active'));
+                
+                // 현재 버튼 활성화
+                this.classList.add('active');
+                selectedFood = this.dataset.value;
+                
+                updateResult();
+            });
+        });
+        
+        // 음식 형태 버튼
+        document.querySelectorAll('.form-btn').forEach(btn => {
+            btn.addEventListener('click', function(e) {
+                e.preventDefault();
+                console.log('형태 버튼 클릭:', this.dataset.value);
+                
+                // 모든 버튼 비활성화
+                document.querySelectorAll('.form-btn').forEach(b => b.classList.remove('active'));
+                
+                // 현재 버튼 활성화
+                this.classList.add('active');
+                selectedForm = this.dataset.value;
+                
+                updateResult();
+            });
+        });
+        
+        // 제출 버튼
+        document.getElementById('submitBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+            console.log('제출 버튼 클릭');
+            
+            if (!selectedFood) {
+                document.getElementById('result').innerHTML = '❌ 음식 종류를 선택해주세요!';
+                document.getElementById('result').style.background = '#ffebee';
+                document.getElementById('result').style.color = '#c62828';
+                return;
+            }
+            
+            let message = `✅ 선택 완료!<br>음식: ${selectedFood}`;
+            if (selectedForm) {
+                message += `<br>형태: ${selectedForm}`;
+            }
+            
+            document.getElementById('result').innerHTML = message;
+            document.getElementById('result').style.background = '#e8f5e9';
+            document.getElementById('result').style.color = '#2e7d32';
+        });
+        
+        function updateResult() {
+            let message = '선택 중...';
+            if (selectedFood) {
+                message = `음식: ${selectedFood}`;
+            }
+            if (selectedForm) {
+                message += ` / 형태: ${selectedForm}`;
+            }
+            document.getElementById('result').innerHTML = message;
+        }
+    </script>
+</body>
+</html>
