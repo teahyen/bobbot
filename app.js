@@ -721,7 +721,7 @@ function displayResults(results) {
         // 클릭 시 구글 검색
         item.addEventListener('click', function() {
             const searchQuery = encodeURIComponent(place.place_name + ' ' + place.address_name);
-            window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
+            window.location.href = `https://www.google.com/search?q=${searchQuery}`;
         });
         
         resultsList.appendChild(item);
@@ -845,7 +845,7 @@ function displayFavorites() {
             // 클릭 시 구글 검색
             item.addEventListener('click', function() {
                 const searchQuery = encodeURIComponent(place.place_name + ' ' + place.address_name);
-                window.open(`https://www.google.com/search?q=${searchQuery}`, '_blank');
+                window.location.href = `https://www.google.com/search?q=${searchQuery}`;
             });
             
             favoritesList.appendChild(item);
