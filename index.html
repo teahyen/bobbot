@@ -23,19 +23,19 @@
                 <div class="form-group">
                     <label>검색 위치 선택</label>
                     <div class="button-group horizontal">
-                        <button type="button" id="useCurrentLocation" class="location-btn active">
-                            📍 현재 위치
+                        <button type="button" id="useCurrentLocation" class="location-btn" disabled>
+                            📍 현재 위치 (모바일 전용)
                         </button>
-                        <button type="button" id="useMapLocation" class="location-btn">
-                            🗺️ 지도 클릭
+                        <button type="button" id="useMapLocation" class="location-btn active">
+                            🗺️ 지도에서 검색
                         </button>
                     </div>
-                    <div class="search-location-input" id="searchLocationInput" style="display: none;">
+                    <div class="search-location-input" id="searchLocationInput" style="display: flex;">
                         <input type="text" id="locationSearchInput" placeholder="주소 또는 장소명 검색 (예: 강남역, 홍대)">
                         <button type="button" id="searchLocationBtn">🔍 검색</button>
                     </div>
                     <div id="locationHelp" class="location-help">
-                        현재 위치로 검색합니다
+                        주소를 검색하거나 지도를 클릭하세요
                     </div>
                 </div>
                 
